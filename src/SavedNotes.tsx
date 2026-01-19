@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { Note } from "./types";
+import styles from "./SavedNotes.module.css";
 
 type SavedNotesProps = {
   notes: Note[];
@@ -37,85 +38,100 @@ export function SavedNotes({
   const canSave = draftTitle.trim() !== "" && draftText.trim() !== "";
 
   return (
-    <section>
-      <h2>Notes</h2>
+    <section className={styles.section}>
+      <h2 className={styles.heading}>Notes</h2>
 
-      <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+      <ul className={styles.list}>
         {notes.map((note) => {
           const isEditing = editingId === note.id;
 
           return (
-            <li
-              key={note.id}
-              style={{
-                border: "1px solid #ddd",
-                borderRadius: 8,
-                padding: 12,
-                marginBottom: 12,
-              }}
-            >
+            <li key={note.id} className={styles.note}>
               {isEditing ? (
-                <>
-                  <div style={{ display: "grid", gap: 8 }}>
-                    <div>
-                      <label htmlFor={`edit-title-${note.id}`}>Title</label>
-                      <input
-                        id={`edit-title-${note.id}`}
-                        type="text"
-                        value={draftTitle}
-                        onChange={(e) => setDraftTitle(e.target.value)}
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor={`edit-text-${note.id}`}>Text</label>
-                      <textarea
-                        id={`edit-text-${note.id}`}
-                        rows={4}
-                        value={draftText}
-                        onChange={(e) => setDraftText(e.target.value)}
-                      />
-                    </div>
-
-                    <div style={{ display: "flex", gap: 8 }}>
-                      <button
-                        type="button"
-                        disabled={!canSave}
-                        onClick={() => {
-                          onUpdate(note.id, {
-                            title: draftTitle.trim(),
-                            text: draftText.trim(),
-                          });
-                          cancelEdit();
-                        }}
-                      >
-                        Save
-                      </button>
-
-                      <button type="button" onClick={cancelEdit}>
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      marginBottom: 8,
-                    }}
-                  >
-                    <strong>{note.title}</strong>
-                    <span>{note.status}</span>
+                <div className={styles.editGrid}>
+                  <div className={styles.field}>
+                    <label htmlFor={`edit-title-${note.id}`}>Title</label>
+                    <input
+                      id={`edit-title-${note.id}`}
+                      type="text"
+                      className={styles.input}
+                      value={draftTitle}
+                      onChange={(e) => setDraftTitle(e.target.value)}
+                    />
                   </div>
 
-                  <p style={{ margin: 0 }}>{note.text}</p>
+                  <div className={styles.field}>
+                    <label htmlFor={`edit-text-${note.id}`}>Text</label>
+                    <textarea
+                      id={`edit-text-${note.id}`}
+                      rows={4}
+                      className={styles.textarea}
+                      value={draftText}
+                      onChange={(e) => setDraftText(e.target.value)}
+                    />
+                  </div>
 
-                  <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                  <div className={styles.actions}>
                     <button
                       type="button"
+                      className={`${styles.button} ${styles.primary}`}
+                      disabled={!canSave}
+                      onClick={() => {
+                        onUpdate(note.id, {
+                          title: draftTitle.trim(),
+                          text: draftText.trim(),
+                        });
+                        cancelEdit();
+                      }}
+                    >
+                      Save
+                    </button>
+
+                    <button
+                      type="button"
+                      className={`${styles.button} ${styles.secondary}`}
+                      onClick={cancelEdit}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className={styles.header}>
+                    <strong className={styles.title}>{note.title}</strong>
+
+                    <div className={styles.headerActions}>
+                      <span
+                        className={`${styles.status} ${
+                          note.status === "pending"
+                            ? styles.statusPending
+                            : styles.statusApproved
+                        }`}
+                      >
+                        {note.status}
+                      </span>
+
+                      <button
+                        type="button"
+                        className={styles.delete}
+                        aria-label="Delete note"
+                        onClick={() => {
+                          const ok = window.confirm("Delete this note?");
+                          if (ok) onDelete(note.id);
+                        }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </div>
+
+                  <p className={styles.text}>{note.text}</p>
+
+                  <div className={styles.actions}>
+                    <button
+                      type="button"
+                      className={`${styles.button} ${styles.primary}`}
                       onClick={() => onToggleStatus(note.id)}
                     >
                       {note.status === "pending"
@@ -123,18 +139,12 @@ export function SavedNotes({
                         : "Mark as pending"}
                     </button>
 
-                    <button type="button" onClick={() => startEdit(note)}>
-                      Edit
-                    </button>
-
                     <button
                       type="button"
-                      onClick={() => {
-                        const ok = window.confirm("Delete this note?");
-                        if (ok) onDelete(note.id);
-                      }}
+                      className={`${styles.button} ${styles.secondary}`}
+                      onClick={() => startEdit(note)}
                     >
-                      X
+                      Edit
                     </button>
                   </div>
                 </>
