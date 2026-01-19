@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Note } from "./types";
 import styles from "./SavedNotes.module.css";
+import { TITLE_MAX, TEXT_MAX, validateText, validateTitle } from "./validation";
 
 type SavedNotesProps = {
   notes: Note[];
@@ -19,6 +20,9 @@ export function SavedNotes({
   const [draftTitle, setDraftTitle] = useState("");
   const [draftText, setDraftText] = useState("");
 
+  const [touchedTitle, setTouchedTitle] = useState(false);
+  const [touchedText, setTouchedText] = useState(false);
+
   if (notes.length === 0) {
     return <p>No notes yet — add one above.</p>;
   }
@@ -27,15 +31,25 @@ export function SavedNotes({
     setEditingId(note.id);
     setDraftTitle(note.title);
     setDraftText(note.text);
+    setTouchedTitle(false);
+    setTouchedText(false);
   };
 
   const cancelEdit = () => {
     setEditingId(null);
     setDraftTitle("");
     setDraftText("");
+    setTouchedTitle(false);
+    setTouchedText(false);
   };
 
-  const canSave = draftTitle.trim() !== "" && draftText.trim() !== "";
+  const trimmedDraftTitle = draftTitle.trim();
+  const trimmedDraftText = draftText.trim();
+
+  const draftTitleError = validateTitle(trimmedDraftTitle);
+  const draftTextError = validateText(trimmedDraftText);
+
+  const canSave = Boolean(editingId) && !draftTitleError && !draftTextError;
 
   return (
     <section className={styles.section}>
@@ -50,25 +64,53 @@ export function SavedNotes({
               {isEditing ? (
                 <div className={styles.editGrid}>
                   <div className={styles.field}>
-                    <label htmlFor={`edit-title-${note.id}`}>Title</label>
+                    <div className={styles.labelRow}>
+                      <label htmlFor={`edit-title-${note.id}`}>Title</label>
+                      <span className={styles.counter}>
+                        {trimmedDraftTitle.length}/{TITLE_MAX}
+                      </span>
+                    </div>
+
                     <input
                       id={`edit-title-${note.id}`}
                       type="text"
                       className={styles.input}
                       value={draftTitle}
-                      onChange={(e) => setDraftTitle(e.target.value)}
+                      onChange={(e) => {
+                        setDraftTitle(e.target.value);
+                        setTouchedTitle(true);
+                      }}
+                      aria-invalid={touchedTitle && Boolean(draftTitleError)}
                     />
+
+                    {touchedTitle && draftTitleError ? (
+                      <p className={styles.error}>{draftTitleError}</p>
+                    ) : null}
                   </div>
 
                   <div className={styles.field}>
-                    <label htmlFor={`edit-text-${note.id}`}>Text</label>
+                    <div className={styles.labelRow}>
+                      <label htmlFor={`edit-text-${note.id}`}>Text</label>
+                      <span className={styles.counter}>
+                        {trimmedDraftText.length}/{TEXT_MAX}
+                      </span>
+                    </div>
+
                     <textarea
                       id={`edit-text-${note.id}`}
                       rows={4}
                       className={styles.textarea}
                       value={draftText}
-                      onChange={(e) => setDraftText(e.target.value)}
+                      onChange={(e) => {
+                        setDraftText(e.target.value);
+                        setTouchedText(true);
+                      }}
+                      aria-invalid={touchedText && Boolean(draftTextError)}
                     />
+
+                    {touchedText && draftTextError ? (
+                      <p className={styles.error}>{draftTextError}</p>
+                    ) : null}
                   </div>
 
                   <div className={styles.actions}>
@@ -77,9 +119,11 @@ export function SavedNotes({
                       className={`${styles.button} ${styles.primary}`}
                       disabled={!canSave}
                       onClick={() => {
+                        if (!canSave) return;
+
                         onUpdate(note.id, {
-                          title: draftTitle.trim(),
-                          text: draftText.trim(),
+                          title: trimmedDraftTitle,
+                          text: trimmedDraftText,
                         });
                         cancelEdit();
                       }}

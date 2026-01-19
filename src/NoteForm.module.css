@@ -33,3 +33,21 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.labelRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.counter {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.error {
+  margin: 6px 0 0;
+  font-size: 0.9rem;
+  color: #a00;
+}
