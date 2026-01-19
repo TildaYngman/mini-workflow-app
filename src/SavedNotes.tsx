@@ -3,9 +3,14 @@ import type { Note } from "./types";
 type SavedNotesProps = {
   notes: Note[];
   onToggleStatus: (id: string) => void;
+  onDelete: (id: string) => void;
 };
 
-export function SavedNotes({ notes, onToggleStatus }: SavedNotesProps) {
+export function SavedNotes({
+  notes,
+  onToggleStatus,
+  onDelete,
+}: SavedNotesProps) {
   if (notes.length === 0) {
     return <p>No notes yet — add one above.</p>;
   }
@@ -40,6 +45,16 @@ export function SavedNotes({ notes, onToggleStatus }: SavedNotesProps) {
 
             <button type="button" onClick={() => onToggleStatus(note.id)}>
               {note.status === "pending" ? "Mark approved" : "Mark pending"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                const ok = window.confirm("Delete this note?");
+                if (ok) onDelete(note.id);
+              }}
+            >
+              X
             </button>
           </li>
         ))}

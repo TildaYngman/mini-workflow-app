@@ -46,10 +46,18 @@ function App() {
     );
   };
 
+  const handleDeleteNote = (id: string) => {
+    setNotes((prev) => prev.filter((note) => note.id !== id));
+  };
+
   return (
     <main>
       <NoteForm onSubmit={handleAddNote} />
-      <SavedNotes notes={notes} onToggleStatus={handleToggleStatus} />
+      <SavedNotes
+        notes={notes}
+        onToggleStatus={handleToggleStatus}
+        onDelete={handleDeleteNote}
+      />
     </main>
   );
 }
