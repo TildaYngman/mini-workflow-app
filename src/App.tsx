@@ -50,6 +50,23 @@ function App() {
     setNotes((prev) => prev.filter((note) => note.id !== id));
   };
 
+  const handleUpdateNote = (
+    id: string,
+    values: { title: string; text: string },
+  ) => {
+    setNotes((prev) =>
+      prev.map((note) =>
+        note.id === id
+          ? {
+              ...note,
+              title: values.title,
+              text: values.text,
+            }
+          : note,
+      ),
+    );
+  };
+
   return (
     <main>
       <NoteForm onSubmit={handleAddNote} />
@@ -57,6 +74,7 @@ function App() {
         notes={notes}
         onToggleStatus={handleToggleStatus}
         onDelete={handleDeleteNote}
+        onUpdate={handleUpdateNote}
       />
     </main>
   );
